@@ -11,6 +11,8 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import HiddenFiles from "./pages/HiddenFiles";
 import SecurityCenter from "./pages/SecurityCenter";
+import UserProfile from "./pages/UserProfile";
+import ActivityLog from "./pages/ActivityLog";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/app-security" element={<AppSecurity />} />
           <Route path="/hidden-files" element={<HiddenFiles />} />
           <Route path="/security-center" element={<SecurityCenter />} />
+          <Route path="/user-profile" element={<UserProfile />} />
+          <Route path="/activity-log" element={<ActivityLog />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
