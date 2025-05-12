@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import StatusCard from '@/components/StatusCard';
-import { Sidebar } from '@/components/Sidebar';
+import Sidebar from '@/components/Sidebar';
 
 const SecurityCenter = () => {
   return (
