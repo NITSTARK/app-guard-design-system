@@ -1,12 +1,21 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from 'react';
+import AuthForm from '@/components/AuthForm';
+import { Shield } from 'lucide-react';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen flex flex-col items-center justify-center auth-container">
+      <div className="absolute top-5 left-5 flex items-center gap-2 text-white">
+        <Shield className="h-5 w-5" />
+        <span className="font-medium">PC App Lock</span>
       </div>
+      
+      <AuthForm />
+      
+      <p className="mt-8 text-white/80 text-sm">
+        © 2025 PC App Lock. All rights reserved.
+      </p>
     </div>
   );
 };
