@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import AppSecurity from "./pages/AppSecurity";
@@ -13,27 +14,31 @@ import HiddenFiles from "./pages/HiddenFiles";
 import SecurityCenter from "./pages/SecurityCenter";
 import UserProfile from "./pages/UserProfile";
 import ActivityLog from "./pages/ActivityLog";
+import Inbox from "./pages/Inbox";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/app-security" element={<AppSecurity />} />
-          <Route path="/hidden-files" element={<HiddenFiles />} />
-          <Route path="/security-center" element={<SecurityCenter />} />
-          <Route path="/user-profile" element={<UserProfile />} />
-          <Route path="/activity-log" element={<ActivityLog />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <NotificationProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/app-security" element={<AppSecurity />} />
+            <Route path="/hidden-files" element={<HiddenFiles />} />
+            <Route path="/security-center" element={<SecurityCenter />} />
+            <Route path="/user-profile" element={<UserProfile />} />
+            <Route path="/activity-log" element={<ActivityLog />} />
+            <Route path="/inbox" element={<Inbox />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

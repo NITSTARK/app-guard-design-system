@@ -1,234 +1,323 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Image, FileText, Video, AudioLines, Archive, Folder, Plus, Grid2X2, List } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
-} from '@/components/ui/collapsible';
-import StatusCard from '@/components/StatusCard';
-import AuthDialog from '@/components/AuthDialog';
+
+import React, { useState } from 'react';
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Lock, FileText, FileImage, Video, Eye, Share2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import Sidebar from '@/components/Sidebar';
 import BackButton from '@/components/BackButton';
-import { useToast } from '@/components/ui/use-toast';
+import MobileAccessRequest from '@/components/MobileAccessRequest';
 
 const HiddenFiles = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [archivesOpen, setArchivesOpen] = useState(false);
-  const [otherOpen, setOtherOpen] = useState(false);
-  const [authDialogOpen, setAuthDialogOpen] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const handleAuthenticate = () => {
-    setIsAuthenticated(true);
-    setAuthDialogOpen(false);
-  };
+  const [authenticated, setAuthenticated] = useState(false);
+  const [pin, setPin] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(true);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
 
-  const handleAuthClose = () => {
-    if (!isAuthenticated) {
-      // If user cancels authentication, redirect to dashboard
-      navigate('/dashboard');
-      toast({
-        title: "Access Denied",
-        description: "Authentication is required to view hidden files",
-        variant: "destructive",
-      });
+  const handleAuthentication = () => {
+    if (pin === '1234') {
+      setAuthenticated(true);
+      setDialogOpen(false);
+      toast.success('Authentication successful');
     } else {
-      setAuthDialogOpen(false);
+      toast.error('Invalid PIN');
     }
   };
-  
+
+  const handleShare = (fileName: string) => {
+    setSelectedFile(fileName);
+    setShareDialogOpen(true);
+  };
+
+  const confirmShare = () => {
+    if (!email.trim()) {
+      toast.error('Please enter an email address');
+      return;
+    }
+    
+    toast.success(`File shared successfully`, {
+      description: `${selectedFile} has been shared with ${email}`
+    });
+    
+    setShareDialogOpen(false);
+    setEmail('');
+    setSelectedFile(null);
+  };
+
+  const files = [
+    { id: 1, name: 'Confidential_Report.pdf', type: 'document', size: '2.4 MB', date: '2023-04-15' },
+    { id: 2, name: 'Financial_Statement.xlsx', type: 'document', size: '1.8 MB', date: '2023-04-10' },
+    { id: 3, name: 'Project_Roadmap.pptx', type: 'document', size: '5.2 MB', date: '2023-04-05' },
+    { id: 4, name: 'Meeting_Notes.pdf', type: 'document', size: '0.8 MB', date: '2023-03-28' },
+    { id: 5, name: 'ID_Scan.jpg', type: 'image', size: '3.1 MB', date: '2023-03-20' },
+    { id: 6, name: 'Contract_Scan.jpg', type: 'image', size: '2.7 MB', date: '2023-03-15' },
+    { id: 7, name: 'Product_Demo.mp4', type: 'video', size: '24.6 MB', date: '2023-03-10' },
+    { id: 8, name: 'Team_Photo.jpg', type: 'image', size: '5.3 MB', date: '2023-03-05' },
+  ];
+
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case 'document':
+        return <FileText className="w-5 h-5 text-blue-500" />;
+      case 'image':
+        return <FileImage className="w-5 h-5 text-purple-500" />;
+      case 'video':
+        return <Video className="w-5 h-5 text-red-500" />;
+      default:
+        return <FileText className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
   return (
-    <>
-      <AuthDialog 
-        isOpen={authDialogOpen} 
-        onClose={handleAuthClose} 
-        onAuthenticate={handleAuthenticate} 
-      />
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
+      <Sidebar />
       
-      <div className="flex h-screen bg-background">
-        {/* Left Sidebar Navigation */}
-        <div className="w-64 border-r border-slate-200 dark:border-slate-700 bg-background">
-          <div className="p-4">
-            <h2 className="font-semibold text-lg mb-6">Hidden Files</h2>
-            
-            <nav className="space-y-1">
-              <div className="py-1">
-                <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
-                  <Folder className="h-5 w-5" />
-                  <span>Hidden Files</span>
-                </a>
+      <main className="flex-1 overflow-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-4">
+              <BackButton />
+              <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <Eye className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
-              
-              {/* File Categories */}
-              <div className="pl-4 space-y-1">
-                <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <Image className="h-5 w-5" />
-                  <span>Images</span>
-                </a>
-                <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <FileText className="h-5 w-5" />
-                  <span>Documents</span>
-                </a>
-                <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <Video className="h-5 w-5" />
-                  <span>Videos</span>
-                </a>
-                <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <AudioLines className="h-5 w-5" />
-                  <span>Audio</span>
-                </a>
+              <div>
+                <h1 className="text-2xl font-bold">Hidden Files</h1>
+                <p className="text-slate-500 dark:text-slate-400">Access protected content</p>
               </div>
-              
-              {/* Archives Section */}
-              <Collapsible open={archivesOpen} onOpenChange={setArchivesOpen} className="py-1">
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <div className="flex items-center gap-3">
-                    <Archive className="h-5 w-5" />
-                    <span>Archives</span>
-                  </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`h-4 w-4 transition-transform ${archivesOpen ? 'rotate-180' : ''}`}
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-4 space-y-1">
-                  <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <span>ZIP Files</span>
-                  </a>
-                  <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <span>RAR Files</span>
-                  </a>
-                </CollapsibleContent>
-              </Collapsible>
-              
-              {/* Other Section */}
-              <Collapsible open={otherOpen} onOpenChange={setOtherOpen} className="py-1">
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <div className="flex items-center gap-3">
-                    <Folder className="h-5 w-5" />
-                    <span>Other</span>
-                  </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`h-4 w-4 transition-transform ${otherOpen ? 'rotate-180' : ''}`}
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-4 space-y-1">
-                  <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <span>Code Files</span>
-                  </a>
-                  <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <span>Data Files</span>
-                  </a>
-                </CollapsibleContent>
-              </Collapsible>
-            </nav>
+            </div>
+            <div className="flex gap-2">
+              <MobileAccessRequest />
+            </div>
           </div>
+          
+          {authenticated ? (
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+              <Tabs defaultValue="all" className="w-full">
+                <div className="px-4 pt-4">
+                  <TabsList className="w-full max-w-md grid grid-cols-4">
+                    <TabsTrigger value="all">All Files</TabsTrigger>
+                    <TabsTrigger value="documents">Documents</TabsTrigger>
+                    <TabsTrigger value="images">Images</TabsTrigger>
+                    <TabsTrigger value="videos">Videos</TabsTrigger>
+                  </TabsList>
+                </div>
+                
+                <TabsContent value="all" className="p-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Name</th>
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Size</th>
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Date</th>
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {files.map((file) => (
+                          <tr key={file.id} className="border-b last:border-0">
+                            <td className="py-3 flex items-center gap-2">
+                              {getFileIcon(file.type)}
+                              {file.name}
+                            </td>
+                            <td className="py-3 text-slate-500 dark:text-slate-400">{file.size}</td>
+                            <td className="py-3 text-slate-500 dark:text-slate-400">{file.date}</td>
+                            <td className="py-3">
+                              <button
+                                className="p-1.5 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                onClick={() => handleShare(file.name)}
+                              >
+                                <Share2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="documents" className="p-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Name</th>
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Size</th>
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Date</th>
+                          <th className="pb-2 text-left font-medium text-slate-500 dark:text-slate-400">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {files.filter(file => file.type === 'document').map((file) => (
+                          <tr key={file.id} className="border-b last:border-0">
+                            <td className="py-3 flex items-center gap-2">
+                              <FileText className="w-5 h-5 text-blue-500" />
+                              {file.name}
+                            </td>
+                            <td className="py-3 text-slate-500 dark:text-slate-400">{file.size}</td>
+                            <td className="py-3 text-slate-500 dark:text-slate-400">{file.date}</td>
+                            <td className="py-3">
+                              <button
+                                className="p-1.5 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                onClick={() => handleShare(file.name)}
+                              >
+                                <Share2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="images" className="p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {files.filter(file => file.type === 'image').map((file) => (
+                      <div key={file.id} className="rounded-lg overflow-hidden border bg-slate-50 dark:bg-slate-700/50">
+                        <AspectRatio ratio={4/3}>
+                          <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                            <FileImage className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+                          </div>
+                        </AspectRatio>
+                        <div className="p-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium text-sm">{file.name}</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">{file.size}</p>
+                            </div>
+                            <button
+                              className="p-1.5 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                              onClick={() => handleShare(file.name)}
+                            >
+                              <Share2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="videos" className="p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {files.filter(file => file.type === 'video').map((file) => (
+                      <div key={file.id} className="rounded-lg overflow-hidden border bg-slate-50 dark:bg-slate-700/50">
+                        <AspectRatio ratio={16/9}>
+                          <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                            <Video className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+                          </div>
+                        </AspectRatio>
+                        <div className="p-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium text-sm">{file.name}</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">{file.size}</p>
+                            </div>
+                            <button
+                              className="p-1.5 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                              onClick={() => handleShare(file.name)}
+                            >
+                              <Share2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-red-600 dark:text-red-400" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">Authenticate to View Hidden Files</h2>
+              <p className="text-slate-500 dark:text-slate-400 mb-4">This area contains protected content that requires authentication</p>
+              <Button onClick={() => setDialogOpen(true)}>Authenticate Now</Button>
+            </div>
+          )}
         </div>
-        
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <BackButton className="mr-4" />
-                <div className="flex items-center">
-                  <FileText className="h-6 w-6 text-applock-primary mr-2" />
-                  <h1 className="text-2xl font-semibold">Hidden Files</h1>
-                </div>
-              </div>
-            </div>
-            
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <StatusCard title="Total Size" value="0 KB" color="indigo" />
-              <StatusCard title="Encryption Status" value="No Files" />
-              <StatusCard title="Last Backup" value="No backups" />
-            </div>
-            
-            {/* Search and Controls */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="relative w-full max-w-md">
-                <Input 
-                  type="text" 
-                  placeholder="Search files..."
-                  className="pl-10 pr-4 py-2"
-                />
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-slate-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button onClick={() => setViewMode('grid')} variant="ghost" size="icon" className={viewMode === 'grid' ? 'bg-slate-100 dark:bg-slate-800' : ''}>
-                  <Grid2X2 className="h-5 w-5" />
-                </Button>
-                <Button onClick={() => setViewMode('list')} variant="ghost" size="icon" className={viewMode === 'list' ? 'bg-slate-100 dark:bg-slate-800' : ''}>
-                  <List className="h-5 w-5" />
-                </Button>
-                <Button className="bg-applock-primary hover:bg-applock-primary/90">
-                  <Plus className="h-5 w-5 mr-1" /> Add Files
-                </Button>
-              </div>
-            </div>
-            
-            {/* Files View - Empty State */}
-            <Card className="border border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-16">
-                <div className="mb-4 bg-slate-100 dark:bg-slate-800 p-6 rounded-full">
-                  <Folder className="h-12 w-12 text-slate-400" />
-                </div>
-                <h3 className="text-xl font-medium mb-2">No Hidden Files</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-center max-w-md mb-6">
-                  You haven't hidden any files yet. Add your first hidden file to get started.
-                </p>
-                <Button className="bg-applock-purple hover:bg-applock-purple/90">
-                  <Plus className="h-5 w-5 mr-1" /> Add Your First File
-                </Button>
-              </CardContent>
-            </Card>
+      </main>
+      
+      {/* Authentication Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open && !authenticated) {
+          // User closed dialog without authenticating, redirect to dashboard
+          window.location.href = '/dashboard';
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Authentication Required</DialogTitle>
+            <DialogDescription>
+              Enter your PIN to access hidden files.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label htmlFor="pin" className="block text-sm font-medium mb-2">
+              PIN
+            </label>
+            <Input
+              id="pin"
+              type="password"
+              placeholder="Enter PIN"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+            />
+            <p className="text-xs text-slate-500 mt-2">Default PIN: 1234</p>
           </div>
-        </div>
-      </div>
-    </>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
+              Cancel
+            </Button>
+            <Button onClick={handleAuthentication}>
+              Authenticate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share File</DialogTitle>
+            <DialogDescription>
+              Share {selectedFile} with another user.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
+              Email Address
+            </label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmShare}>
+              Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

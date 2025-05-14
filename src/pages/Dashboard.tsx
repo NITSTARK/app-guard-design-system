@@ -4,9 +4,10 @@ import Sidebar from '@/components/Sidebar';
 import StatusCard from '@/components/StatusCard';
 import QuickAction from '@/components/QuickAction';
 import ActivityTable from '@/components/ActivityTable';
-import { Shield, Lock, Eye, Search, Bell, Settings } from 'lucide-react';
+import { Shield, Lock, Eye, Search, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import NotificationBadge from '@/components/NotificationBadge';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -87,9 +88,7 @@ const Dashboard = () => {
               <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                 <Search className="w-5 h-5 text-slate-500 dark:text-slate-400" />
               </button>
-              <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
-                <Bell className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-              </button>
+              <NotificationBadge />
               <button 
                 className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
                 onClick={() => handleNavigation('/settings')}
