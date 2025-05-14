@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { Input } from '@/components/ui/input';
@@ -18,6 +17,7 @@ import {
   TabsTrigger 
 } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   User,
   Bell,
@@ -398,22 +398,7 @@ const Settings = () => {
                 <div className="mb-8">
                   <h3 className="text-lg font-medium mb-4">Theme</h3>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 flex flex-col items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80">
-                      <div className="w-full h-24 bg-white rounded mb-4"></div>
-                      <span className="font-medium">Light Mode</span>
-                    </div>
-                    
-                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 flex flex-col items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80">
-                      <div className="w-full h-24 bg-slate-900 rounded mb-4"></div>
-                      <span className="font-medium">Dark Mode</span>
-                    </div>
-                    
-                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 flex flex-col items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80">
-                      <div className="w-full h-24 bg-gradient-to-b from-white to-slate-900 rounded mb-4"></div>
-                      <span className="font-medium">System Default</span>
-                    </div>
-                  </div>
+                  <ThemeToggle />
                 </div>
                 
                 <div className="mb-8">
