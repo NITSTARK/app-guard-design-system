@@ -42,8 +42,7 @@ const AuthDialog = ({ isOpen, onClose, onAuthenticate }: AuthDialogProps) => {
       if (pin === "1234") {
         setIsLoading(false);
         onAuthenticate();
-        toast({
-          title: "Authentication successful",
+        toast.success("Authentication successful", {
           description: "You now have access to hidden files",
         });
       } else {
