@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,23 +9,19 @@ import { toast } from "sonner";
 import Sidebar from '@/components/Sidebar';
 import BackButton from '@/components/BackButton';
 import MobileAccessRequest from '@/components/MobileAccessRequest';
+import AuthDialog from '@/components/AuthDialog';
 
 const HiddenFiles = () => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [pin, setPin] = useState('');
   const [dialogOpen, setDialogOpen] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [email, setEmail] = useState('');
 
   const handleAuthentication = () => {
-    if (pin === '1234') {
-      setAuthenticated(true);
-      setDialogOpen(false);
-      toast.success('Authentication successful');
-    } else {
-      toast.error('Invalid PIN');
-    }
+    setAuthenticated(true);
+    setDialogOpen(false);
+    toast.success('Authentication successful');
   };
 
   const handleShare = (fileName: string) => {
@@ -248,43 +243,17 @@ const HiddenFiles = () => {
       </main>
       
       {/* Authentication Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
-        setDialogOpen(open);
-        if (!open && !authenticated) {
-          // User closed dialog without authenticating, redirect to dashboard
-          window.location.href = '/dashboard';
-        }
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Authentication Required</DialogTitle>
-            <DialogDescription>
-              Enter your PIN to access hidden files.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <label htmlFor="pin" className="block text-sm font-medium mb-2">
-              PIN
-            </label>
-            <Input
-              id="pin"
-              type="password"
-              placeholder="Enter PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-            />
-            <p className="text-xs text-slate-500 mt-2">Default PIN: 1234</p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
-              Cancel
-            </Button>
-            <Button onClick={handleAuthentication}>
-              Authenticate
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AuthDialog 
+        isOpen={dialogOpen}
+        onClose={() => {
+          setDialogOpen(false);
+          if (!authenticated) {
+            // User closed dialog without authenticating, redirect to dashboard
+            window.location.href = '/dashboard';
+          }
+        }}
+        onAuthenticate={handleAuthentication}
+      />
       
       {/* Share Dialog */}
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>

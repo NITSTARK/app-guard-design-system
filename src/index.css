@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,6 +96,18 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold;
   }
+}
+
+/* Privacy blur effect for dialogs */
+.privacy-blur #root > *:not(.radix-dialog-overlay) {
+  filter: blur(8px);
+  transition: filter 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+/* Reset pointer events for dialog content */
+.radix-dialog-content {
+  pointer-events: auto !important;
 }
 
 .auth-container {

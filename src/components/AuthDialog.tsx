@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,20 @@ const AuthDialog = ({ isOpen, onClose, onAuthenticate }: AuthDialogProps) => {
   const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Add blur effect to the page when the dialog is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('privacy-blur');
+    } else {
+      document.body.classList.remove('privacy-blur');
+    }
+    
+    // Clean up on unmount
+    return () => {
+      document.body.classList.remove('privacy-blur');
+    };
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +58,7 @@ const AuthDialog = ({ isOpen, onClose, onAuthenticate }: AuthDialogProps) => {
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) onClose();
     }}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] z-50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lock className="h-5 w-5 text-applock-primary" />
