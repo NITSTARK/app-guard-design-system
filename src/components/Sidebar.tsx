@@ -10,8 +10,8 @@ import {
   Users, 
   FileText,
   Inbox,
-  BarChart3,
-  User
+  User,
+  Eye
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,7 +22,7 @@ const navItems = [
   { icon: FileText, label: 'Hidden Files', path: '/hidden-files' },
   { icon: Activity, label: 'Activity Logs', path: '/activity-log' },
   { icon: Inbox, label: 'Inbox', path: '/inbox' },
-  { icon: BarChart3, label: 'Reports', path: '/reports' },
+  { icon: Shield, label: 'Privacy Dashboard', path: '/privacy-dashboard' },
   { icon: User, label: 'User Profile', path: '/user-profile' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];

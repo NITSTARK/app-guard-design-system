@@ -15,6 +15,7 @@ import SecurityCenter from "./pages/SecurityCenter";
 import UserProfile from "./pages/UserProfile";
 import ActivityLog from "./pages/ActivityLog";
 import Inbox from "./pages/Inbox";
+import PrivacyDashboard from "./pages/PrivacyDashboard";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/user-profile" element={<UserProfile />} />
             <Route path="/activity-log" element={<ActivityLog />} />
             <Route path="/inbox" element={<Inbox />} />
+            <Route path="/privacy-dashboard" element={<PrivacyDashboard />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
