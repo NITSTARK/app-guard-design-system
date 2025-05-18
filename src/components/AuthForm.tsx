@@ -116,7 +116,6 @@ const AuthForm = () => {
                         key={index} 
                         index={index}
                         className="w-16 h-12 text-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
-                        {...slot} 
                       />
                     ))}
                   </InputOTPGroup>
