@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Lock, Key } from "lucide-react";
 import { toast } from "sonner";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -16,6 +17,14 @@ const AuthDialog = ({ isOpen, onClose, onAuthenticate }: AuthDialogProps) => {
   const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Reset pin when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setPin("");
+      setError(null);
+    }
+  }, [isOpen]);
 
   // Add blur effect to the page when the dialog is open
   useEffect(() => {
@@ -31,8 +40,18 @@ const AuthDialog = ({ isOpen, onClose, onAuthenticate }: AuthDialogProps) => {
     };
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Auto-authenticate when PIN is complete
+  useEffect(() => {
+    if (pin.length === 4) {
+      handleSubmit();
+    }
+  }, [pin]);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -70,20 +89,25 @@ const AuthDialog = ({ isOpen, onClose, onAuthenticate }: AuthDialogProps) => {
         
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="space-y-2">
-            <div className="relative">
-              <Input
-                type="password"
-                placeholder="Enter PIN"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                className={`pl-10 ${error ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                disabled={isLoading}
-                autoFocus
-                maxLength={4}
+            <div className="flex justify-center py-2">
+              <InputOTP 
+                maxLength={4} 
+                value={pin} 
+                onChange={setPin}
+                render={({ slots }) => (
+                  <InputOTPGroup>
+                    {slots.map((slot, index) => (
+                      <InputOTPSlot 
+                        key={index} 
+                        index={index}
+                        className="w-16 h-12 text-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                )}
               />
-              <Key className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           </div>
           
           <div className="flex justify-end space-x-2">
