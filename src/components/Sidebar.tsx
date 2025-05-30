@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
@@ -11,7 +10,8 @@ import {
   FileText,
   Inbox,
   User,
-  Eye
+  Eye,
+  TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +21,7 @@ const navItems = [
   { icon: Shield, label: 'Security Center', path: '/security-center' },
   { icon: FileText, label: 'Hidden Files', path: '/hidden-files' },
   { icon: Activity, label: 'Activity Logs', path: '/activity-log' },
+  { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
   { icon: Inbox, label: 'Inbox', path: '/inbox' },
   { icon: Shield, label: 'Privacy Dashboard', path: '/privacy-dashboard' },
   { icon: User, label: 'User Profile', path: '/user-profile' },

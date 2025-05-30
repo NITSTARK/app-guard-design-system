@@ -17,6 +17,7 @@ import UserProfile from "./pages/UserProfile";
 import ActivityLog from "./pages/ActivityLog";
 import Inbox from "./pages/Inbox";
 import PrivacyDashboard from "./pages/PrivacyDashboard";
+import Analytics from "./pages/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/activity-log" element={<ActivityLog />} />
               <Route path="/inbox" element={<Inbox />} />
               <Route path="/privacy-dashboard" element={<PrivacyDashboard />} />
+              <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
