@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,27 +6,37 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext';
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 
 const AuthForm = () => {
-  const [activeTab, setActiveTab] = useState("pin");
+  const [activeTab, setActiveTab] = useState("password");
   const [pinValue, setPinValue] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
   
   const passwordInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
 
-  // Effect to auto-unlock when PIN is complete
   useEffect(() => {
-    if (pinValue.length === 4) {
+    if (activeTab === "pin" && pinValue.length === 4) {
       handleUnlock();
     }
-  }, [pinValue]);
+  }, [pinValue, activeTab]);
 
   const handlePinChange = (value: string) => {
     setPinValue(value);
+    setError("");
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
     setError("");
   };
 
@@ -36,43 +45,81 @@ const AuthForm = () => {
     setError("");
   };
 
-  const handleBiometricAuth = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Biometric authentication successful");
-      navigate("/dashboard");
-    }, 1500);
-  };
-
-  const handleUnlock = () => {
+  const handleBiometricRegister = async () => {
     setLoading(true);
     setError("");
-    
-    // Simulate authentication
-    setTimeout(() => {
+    try {
+      const regResp = await axios.post('http://localhost:5000/api/webauthn/register/begin');
+      const asseResp = await startRegistration(regResp.data.data);
+      const verificationResp = await axios.post('http://localhost:5000/api/webauthn/register/complete', asseResp);
+      if (verificationResp.data.success) {
+        toast.success("Biometric registration successful");
+      } else {
+        throw new Error(verificationResp.data.error || "Registration failed");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
       setLoading(false);
-      
-      if (activeTab === "pin" && pinValue === "1234") {
-        toast.success("PIN authentication successful");
-        navigate("/dashboard");
-      } else if (activeTab === "password" && password === "password") {
-        toast.success("Password authentication successful");
+    }
+  };
+
+  const handleBiometricAuth = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const authResp = await axios.post('http://localhost:5000/api/webauthn/authenticate/begin');
+      const asseResp = await startAuthentication(authResp.data.data);
+      const verificationResp = await axios.post('http://localhost:5000/api/webauthn/authenticate/complete', asseResp);
+
+      if (verificationResp.data.success) {
+        // This part needs to be updated to handle the JWT token from the backend
+        toast.success("Biometric authentication successful");
         navigate("/dashboard");
       } else {
-        setError("Invalid credentials, please try again");
-        toast.error("Authentication failed");
-        
-        if (activeTab === "pin") {
-          setPinValue("");
-        }
+        throw new Error(verificationResp.data.error || "Authentication failed");
       }
-    }, 1000);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUnlock = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      let response;
+      if (activeTab === "password") {
+        response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      } else if (activeTab === "pin") {
+        toast.info("PIN authentication not yet implemented with backend.");
+        setLoading(false);
+        return;
+      }
+
+      if (response && response.data.success) {
+        login(response.data.data);
+        toast.success("Authentication successful");
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error?.message || "An unexpected error occurred.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-    // Focus back on the password input after toggling
     setTimeout(() => {
       passwordInputRef.current?.focus();
     }, 0);
@@ -89,7 +136,7 @@ const AuthForm = () => {
       <h2 className="text-2xl font-bold text-center mb-2">PC App Lock</h2>
       <p className="text-slate-500 dark:text-slate-400 text-center mb-6">Secure your applications and files</p>
       
-      <Tabs defaultValue="pin" value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="password" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-3 mb-6 bg-black/20 dark:bg-slate-800/50">
           <TabsTrigger value="pin" className="text-center data-[state=active]:bg-black/40 dark:data-[state=active]:bg-slate-700">
             PIN
@@ -130,12 +177,21 @@ const AuthForm = () => {
           <div className="flex flex-col space-y-4">
             <div className="relative">
               <Input
+                ref={emailInputRef}
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={handleEmailChange}
+                autoFocus
+              />
+            </div>
+            <div className="relative">
+              <Input
                 ref={passwordInputRef}
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 onChange={handlePasswordChange}
-                autoFocus
                 className="pr-10"
               />
               <button
@@ -147,7 +203,7 @@ const AuthForm = () => {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Enter your password</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Enter your email and password</p>
           </div>
         </TabsContent>
         
@@ -160,6 +216,7 @@ const AuthForm = () => {
               <Fingerprint className="w-10 h-10 text-blue-500" />
             </button>
             <p className="text-slate-500 dark:text-slate-400 text-sm">Tap to authenticate with biometric</p>
+            <Button onClick={handleBiometricRegister} variant="link">Register Biometric</Button>
           </div>
         </TabsContent>
         
@@ -175,7 +232,7 @@ const AuthForm = () => {
               onClick={handleUnlock}
               disabled={
                 loading || 
-                (activeTab === "password" && !password) ||
+                (activeTab === "password" && (!password || !email)) ||
                 activeTab === "biometric"
               }
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6"

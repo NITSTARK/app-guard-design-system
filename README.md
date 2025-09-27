@@ -34,6 +34,37 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Project Status (as of 2025-09-27)
+
+This project is currently under active development. The backend has been significantly built out to match the `API_SPECIFICATION.md`, and the frontend authentication has been connected to the backend.
+
+### Backend Status
+
+The following API sections have been implemented in the Flask backend:
+-   User Management (`/api/user`)
+-   App Security & Locking (`/api/apps`) - *Mock implementation*
+-   Hidden Files Management (`/api/files`)
+-   Notifications (`/api/notifications`)
+-   Activity Logging (`/api/activity`)
+-   Analytics & Reports (`/api/analytics`) - *Mock implementation*
+-   Device Management (`/api/devices`) - *Mock implementation*
+-   System Settings (`/api/settings`) - *Mock implementation*
+
+The backend now includes a `requirements.txt` file for managing Python dependencies.
+
+### Frontend Status
+
+-   The login form (`AuthForm.tsx`) has been connected to the backend's `/api/auth/login` endpoint.
+-   An `AuthContext` has been created to manage user sessions across the application.
+
+### Biometric Authentication (Windows Hello)
+
+The biometric authentication feature is currently being implemented using the **WebAuthn/FIDO2 standard**. This will allow for secure, passwordless authentication using platform authenticators like Windows Hello, Touch ID, and Android's biometric systems.
+
+The implementation will involve:
+1.  **Frontend**: Integrating a WebAuthn client library to handle the registration and authentication ceremonies in the browser.
+2.  **Backend**: Using a FIDO2 server library (like `fido2` for Python) to manage the server-side logic of the WebAuthn protocol, including challenge generation and response verification.
+
 ## What technologies are used for this project?
 
 This project is built with:
